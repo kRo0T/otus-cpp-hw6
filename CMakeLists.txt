@@ -4,6 +4,8 @@ project(hw6 VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
+set(CMAKE_CXX_STANDARD 17)
+
 add_executable(hw6 main.cpp)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

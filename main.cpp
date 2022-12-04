@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <cassert>
 
 using namespace std;
 
@@ -15,10 +16,10 @@ template<typename T>
 class Element : public IElement<T> {
     using element_t = Element<T>;
     T value;
-    map<int, T>& data;
-    int index;
+    map<pair<int, int>, T>& data;
+    pair<int, int> index;
 public:
-    Element(map<int, T>& data, int index) : data(data), index(index) {}
+    Element(map<int, T>& data, int xi, int yi) : data(data), index(xi, yi) {}
     element_t& operator=(T new_val) {
         data[index] = new_val;
         return *this;
@@ -31,11 +32,11 @@ public:
 template<typename T, T def_value>
 class ProxyElement : public IElement<T> {
     using proxy_elem_t = ProxyElement<T, def_value>;
-    map<int, T>& data;
-    int index;
+    map<pair<int, int>, T>& data;
+    pair<int, int> index;
 public:
     Element<T>* element;
-    ProxyElement(map<int, T>& data, int index) : data(data), index(index) {
+    ProxyElement(map<pair<int, int>, T>& data, int xi, int yi) : data(data), index(xi, yi) {
         cout << "Proxy ctr" << endl;
     }
     operator T() {
@@ -59,24 +60,44 @@ public:
 };
 
 template <typename T, T def_value>
-class SparseVector {
-    map<int, int> data;
+class Matrix {
+    map<pair<int,int>, T> data;
+    class IndexHelper {
+        int i;
+        Matrix& m;
+    public:
+        IndexHelper(Matrix& m, int i) : m(m), i(i) {}
+        ProxyElement<T, def_value> operator[](int j) {
+            //return m.data[pair<int, int>(i,j)];
+            return ProxyElement<T, def_value>(m.data, i, j);
+        }
+    };
 public:
-    ProxyElement<T, def_value> operator[](int i) {
-        cout << "SV operator []" << endl;
-        return ProxyElement<T, def_value>(data, i);
+    IndexHelper operator[](int i) {
+        return IndexHelper(*this, i);
     }
+    size_t size() {
+        return data.size();
+    }
+    auto begin() { return data.begin(); }
+    auto end() { return data.end(); }
 };
 
+
 int main() {
-    SparseVector<int, -1> vec;
-    cout << vec[0] << endl;
-    vec[0] = 2;
-    cout << vec[0] << endl;
-    vec[0] = -1;
-    cout << vec[0] << endl;
-    //pe.element = &e;
-    //int val = pe;
-    //cout << val << endl;
+    Matrix<int, -1> matrix;
+    assert(matrix.size() == 0);
+    auto a = matrix[0][0];
+    assert(a == -1);
+    assert(matrix.size() == 0);
+    matrix[100][100] = 314;
+    assert(matrix[100][100] == 314);
+    assert(matrix.size() == 1);
+
+    //for(auto& c: matrix) {
+        //int x; int y; int v;
+        //std::tie(x, y, v) = c;
+        //std::cout << x << y << v << std::endl;
+    //}
     return 0;
 }
