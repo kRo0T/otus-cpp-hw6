@@ -37,7 +37,7 @@ class ProxyElement : public IElement<T> {
 public:
     Element<T>* element;
     ProxyElement(map<pair<int, int>, T>& data, int xi, int yi) : data(data), index(xi, yi) {
-        cout << "Proxy ctr" << endl;
+        //cout << "Proxy ctr" << endl;
     }
     operator T() {
         auto res = data.find(index);
@@ -49,7 +49,7 @@ public:
     }
     proxy_elem_t& operator=(T new_val) {
         if (new_val == def_value) {
-            cout << "Free element" << endl;
+            //cout << "Free element" << endl;
             data.erase(index);
         } else {
             //*element = new_val;
