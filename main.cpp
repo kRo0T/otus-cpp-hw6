@@ -12,44 +12,39 @@ public:
     virtual operator T() = 0;
 };
 
-template<typename T>
+template<typename T, T def_value>
 class Element : public IElement<T> {
-    using element_t = Element<T>;
-    T value;
-    map<pair<int, int>, T>& data;
+    using element_t = Element<T, def_value>;
+    T value = def_value;
     pair<int, int> index;
 public:
-    Element(map<int, T>& data, int xi, int yi) : data(data), index(xi, yi) {}
+    Element() = default;
     element_t& operator=(T new_val) {
-        data[index] = new_val;
+        value = new_val;
         return *this;
     }
     operator T() {
-        return data[index];
+        return value;
     }
 };
 
 template<typename T, T def_value>
 class ProxyElement : public IElement<T> {
     using proxy_elem_t = ProxyElement<T, def_value>;
-    map<pair<int, int>, T>& data;
+    map<pair<int, int>, Element<T, def_value>>& data;
     pair<int, int> index;
 public:
-    Element<T>* element;
-    ProxyElement(map<pair<int, int>, T>& data, int xi, int yi) : data(data), index(xi, yi) {
-        //cout << "Proxy ctr" << endl;
-    }
+    ProxyElement(map<pair<int, int>, Element<T, def_value>>& data, int xi, int yi) : data(data), index(xi, yi) { }
     operator T() {
         auto res = data.find(index);
         if (res != data.end())
-            return res->second;
-            //return element->operator T();
+            //return res->second;
+            return res->second.operator T();
         else
             return def_value;
     }
     proxy_elem_t& operator=(T new_val) {
         if (new_val == def_value) {
-            //cout << "Free element" << endl;
             data.erase(index);
         } else {
             //*element = new_val;
@@ -61,7 +56,7 @@ public:
 
 template <typename T, T def_value>
 class Matrix {
-    map<pair<int, int>, T> data;
+    map<pair<int, int>, Element<T, def_value>> data;
     class IndexHelper {
         int i;
         Matrix& m;
@@ -84,7 +79,7 @@ public:
 
 
 int main() {
-    Matrix<int, -1> matrix;
+    /*Matrix<int, -1> matrix;
     assert(matrix.size() == 0);
     auto a = matrix[0][0];
     assert(a == -1);
@@ -96,6 +91,23 @@ int main() {
     for(auto& c: matrix) {
         auto [x, v] = c;
         std::cout << x.first << x.second << v << std::endl;
+    }*/
+    
+    Matrix<int, 0> matrix_1;
+    for (int i=0; i<10; i++) {
+        matrix_1[i][i] = i;
+        matrix_1[i][9-i] = 9-i;
+    }
+    for (int i=1; i<9; i++) {
+        for (int j=1; j<9; j++) {
+            cout << matrix_1[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << "Size: " << matrix_1.size() << endl;
+    for(auto& c: matrix_1) {
+        auto [x, v] = c;
+        std::cout << x.first << ", " << x.second << ": " << v << std::endl;
     }
     return 0;
 }
