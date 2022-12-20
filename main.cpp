@@ -61,14 +61,13 @@ public:
 
 template <typename T, T def_value>
 class Matrix {
-    map<pair<int,int>, T> data;
+    map<pair<int, int>, T> data;
     class IndexHelper {
         int i;
         Matrix& m;
     public:
         IndexHelper(Matrix& m, int i) : m(m), i(i) {}
         ProxyElement<T, def_value> operator[](int j) {
-            //return m.data[pair<int, int>(i,j)];
             return ProxyElement<T, def_value>(m.data, i, j);
         }
     };
@@ -94,10 +93,9 @@ int main() {
     assert(matrix[100][100] == 314);
     assert(matrix.size() == 1);
 
-    //for(auto& c: matrix) {
-        //int x; int y; int v;
-        //std::tie(x, y, v) = c;
-        //std::cout << x << y << v << std::endl;
-    //}
+    for(auto& c: matrix) {
+        auto [x, v] = c;
+        std::cout << x.first << x.second << v << std::endl;
+    }
     return 0;
 }
